@@ -2,12 +2,24 @@
  * @lc app=leetcode id=706 lang=javascript
  *
  * [706] Design HashMap
+ * time complexity: average O(n), worst case O(n)
+ * space complexity: O(n)
  */
 
 // @lc code=start
 
+class Node {
+  constructor(key, value, next) {
+    this.key = key;
+    this.value = value;
+    this.next = next;
+  }
+}
+
 var MyHashMap = function () {
-  this.data = new Array(1000000);
+  this.size = 1997;
+  this.multi = 104729;
+  this.data = new Array(this.size).fill(null);
 };
 
 /**
@@ -16,7 +28,10 @@ var MyHashMap = function () {
  * @return {void}
  */
 MyHashMap.prototype.put = function (key, value) {
-  this.data[key] = value;
+  this.remove(key);
+  let hash = this.hash(key);
+  let node = new Node(key, value, this.data[hash]);
+  this.data[hash] = node;
 };
 
 /**
@@ -24,12 +39,14 @@ MyHashMap.prototype.put = function (key, value) {
  * @return {number}
  */
 MyHashMap.prototype.get = function (key) {
-  let val = this.data[key];
-  if (val === undefined) {
-    return -1;
-  } else {
-    return val;
+  let hash = this.hash(key);
+  let node = this.data[hash];
+  for (; node; node = node.next) {
+    if (node.key === key) {
+      return node.value;
+    }
   }
+  return -1;
 };
 
 /**
@@ -37,7 +54,31 @@ MyHashMap.prototype.get = function (key) {
  * @return {void}
  */
 MyHashMap.prototype.remove = function (key) {
-  delete this.data[key];
+  let hash = this.hash(key);
+  let node = this.data[hash];
+  if (!node) {
+    return;
+  }
+  if (node.key === key) {
+    this.data[hash] = node.next;
+  } else {
+    for (; node.next; node = node.next) {
+      if (node.next.key === key) {
+        let delete_node = node.next;
+        node.next = node.next.next;
+        delete delete_node;
+        return;
+      }
+    }
+  }
+};
+
+/**
+ * @param {number} key
+ * @return {number} hash value
+ */
+MyHashMap.prototype.hash = function (key) {
+  return (key * this.multi) % this.size;
 };
 
 /**
